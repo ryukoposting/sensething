@@ -1,0 +1,17 @@
+Style/Documentation:
+  Enabled: false
+
+Metrics/ClassLength:
+  Enabled: false
+
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/MethodLength:
+  Max: 25
+
+Metrics/CyclomaticComplexity:
+  Max: 10
+
+Style/PerlBackrefs:
+  Enabled: false

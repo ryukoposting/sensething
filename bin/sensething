@@ -1,0 +1,159 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'sensething'
+require 'csv'
+require 'json'
+
+def gather_sensors
+  result = {}
+  SenseThing.discover_devices do |dev|
+    dev.each_sensor do |sensor|
+      result[sensor.name] = sensor
+    end
+  end
+  result
+end
+
+def gather_relevant_sensors(names)
+  sensors = gather_sensors
+  names.map do |name|
+    s = sensors[name]
+    raise "No sensor with name '#{name}'" unless s
+
+    s
+  end
+end
+
+def putline
+  puts '=' * 80
+end
+
+def list_sensors
+  SenseThing.discover_devices do |dev|
+    dev.each_sensor do |sensor|
+      puts "#{sensor.name.to_s.ljust(29)} #{sensor.summary}"
+    end
+  end
+end
+
+def sensor_info(names)
+  names ||= []
+  sensors = gather_relevant_sensors(names)
+
+  sensors.each_with_index do |sensor, i|
+    puts "#{sensor.name.to_s.ljust(29)} #{sensor.summary}"
+    puts sensor.detail
+    putline if i < sensors.length - 1
+  end
+end
+
+def read_sensors(names)
+  names ||= []
+  sensors = gather_relevant_sensors(names)
+
+  sensors.each do |sensor|
+    # p sensor
+    puts "#{sensor.name.to_s.ljust(29)} #{sensor.fetch} #{sensor.unit}"
+  end
+end
+
+def get_timer(param)
+  case param
+  when 'seconds'
+    SenseThing::OffsetTimer.new
+  when 'millis'
+    SenseThing::OffsetTimer.new(format: :millis)
+  when 'iso8601-millis'
+    SenseThing::AbsoluteTimer.new
+  when 'iso8601'
+    SenseThing::AbsoluteTimer.new(format: '%Y-%m-%dT%H:%M:%S%z')
+  when nil
+    SenseThing::Timer.new
+  else
+    raise "Invalid timestamp type '#{param}' - try 'sensething log --help'"
+  end
+end
+
+def log_csv(sensors, interval, units, timer)
+  $stdout.sync = true
+  has_timestamps = timer.is_a?(SenseThing::StampingTimer)
+  CSV($stdout.dup) do |csv|
+    headers = []
+    headers << 'TIME' if has_timestamps
+    sensors.each do |s|
+      headers << if units
+                   "#{s.name} [#{s.unit}]"
+                 else
+                   s.name.to_s
+                 end
+    end
+    csv << headers
+    loop do
+      timer.set_offset!
+      row = sensors.map(&:fetch)
+      if has_timestamps
+        timer.capture!
+        row.insert(0, timer.timestamp)
+      end
+      csv << row
+      timer.sleep(interval)
+    end
+  end
+end
+
+def log_json(sensors, interval, units, timer)
+  $stdout.sync = true
+  has_timestamps = timer.is_a?(SenseThing::StampingTimer)
+  loop do
+    data = sensors.map do |s|
+      value = s.fetch
+      if units
+        [s.name.to_s, { value: value, unit: s.unit }]
+      else
+        [s.name.to_s, value]
+      end
+    end
+    timer.capture! if has_timestamps
+    data = data.to_h
+    data['TIME'] = timer.timestamp if has_timestamps
+
+    JSON.dump(data, $stdout)
+    $stdout.write "\n"
+    timer.sleep(interval)
+    timer.set_offset!
+  end
+end
+
+def log_sensors(names, format, interval, units, timer)
+  timer = get_timer(timer)
+  names ||= []
+  format ||= 'csv'
+  interval ||= 5
+  sensors = gather_relevant_sensors(names)
+
+  case format
+  when 'csv'
+    log_csv(sensors, interval, units, timer)
+  when 'json'
+    log_json(sensors, interval, units, timer)
+  else
+    raise "Invalid format: #{format}"
+  end
+end
+
+args = SenseThing::Cli.parse_command_line
+
+case args&.cmd&.name
+when nil
+  SenseThing::Cli.show_help
+  exit 0
+when 'list-sensors'
+  list_sensors
+when 'info'
+  sensor_info(args.cmd[:name])
+when 'read'
+  read_sensors(args.cmd[:name])
+when 'log'
+  log_sensors(args.cmd[:name], args.cmd[:format], args.cmd[:interval], args.cmd[:units], args.cmd[:timestamp])
+end
