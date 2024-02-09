@@ -1,4 +1,5 @@
 require 'optparse'
+require 'set'
 require 'io/console'
 
 module SenseThing

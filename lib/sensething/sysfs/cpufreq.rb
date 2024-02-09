@@ -28,13 +28,13 @@ module Sysfs
       name = path.basename.to_s
       case name
       when 'scaling_cur_freq'
-        FrequencyValue.new(path)
+        CpuFrequencyValue.new(path)
       when 'scaling_min_freq'
-        FrequencyMin.new(path)
+        CpuFrequencyMin.new(path)
       when 'scaling_max_freq'
-        FrequencyMax.new(path)
+        CpuFrequencyMax.new(path)
       when 'scaling_governor'
-        Governor.new(path)
+        CpuGovernor.new(path)
       end
     end
 
@@ -70,13 +70,13 @@ module Sysfs
       @device = device
       attrs.each do |a|
         case a
-        when FrequencyMin
+        when CpuFrequencyMin
           @min_attr = a
-        when FrequencyMax
+        when CpuFrequencyMax
           @max_attr = a
-        when FrequencyValue
+        when CpuFrequencyValue
           @value_attr = a
-        when Governor
+        when CpuGovernor
           @governor_attr = a
         end
       end
@@ -117,26 +117,26 @@ module Sysfs
     def detail
       result = []
       result << "value: #{value_attr.path}" if value_attr
-      result << "governor: #{governor_attr.path}" if governor_attr
+      result << "CpuGovernor: #{governor_attr.path}" if governor_attr
       result << "min: #{min_attr.path}" if min_attr
       result << "max: #{max_attr.path}" if max_attr
       result.join("\n")
     end
   end
 
-  class FrequencyValue < CpufreqAttribute
+  class CpuFrequencyValue < CpufreqAttribute
     include Megahertz
   end
 
-  class FrequencyMin < CpufreqAttribute
+  class CpuFrequencyMin < CpufreqAttribute
     include Megahertz
   end
 
-  class FrequencyMax < CpufreqAttribute
+  class CpuFrequencyMax < CpufreqAttribute
     include Megahertz
   end
 
-  class Governor < CpufreqAttribute
+  class CpuGovernor < CpufreqAttribute
     def fetch
       @val = read.strip
     end

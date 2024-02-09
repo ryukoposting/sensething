@@ -80,6 +80,7 @@ module NvidiaSmi
           end
         end
       end
+    rescue Errno::ENOENT # rubocop:disable Lint/SuppressedException
     end
 
     def each_sensor # rubocop:disable Metrics/CyclomaticComplexity
