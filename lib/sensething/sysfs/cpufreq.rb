@@ -23,7 +23,9 @@ module Sysfs
   end
 
   class Cpufreq < Device
-    def self.parse_attr_by_name(name, path)
+    def self.parse_attr_by_name(path)
+      path = Pathname.new(path.to_s) unless path.is_a? Pathname
+      name = path.basename.to_s
       case name
       when 'scaling_cur_freq'
         FrequencyValue.new(path)
@@ -45,7 +47,7 @@ module Sysfs
     def discover_attributes
       attrs = []
       @path.each_child do |pn|
-        if (attr = self.class.parse_attr_by_name(pn.basename.to_s, pn))
+        if (attr = self.class.parse_attr_by_name(pn))
           attrs << attr
         end
       end

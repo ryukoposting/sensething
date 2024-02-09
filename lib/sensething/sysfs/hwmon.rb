@@ -72,7 +72,9 @@ module Sysfs
   end
 
   class Hwmon < Device
-    def self.parse_attr_by_name(name, path)
+    def self.parse_attr_by_name(path)
+      path = Pathname.new(path.to_s) unless path.is_a? Pathname
+      name = path.basename.to_s
       if name.start_with? 'in'
         chan_num, type = parse_attr_num_text(name[2..])
         parse_in_attr(chan_num, type, path)
@@ -111,7 +113,7 @@ module Sysfs
     def discover_attributes
       attrs = []
       @path.each_child do |pn|
-        if (attr = self.class.parse_attr_by_name(pn.basename.to_s, pn))
+        if (attr = self.class.parse_attr_by_name(pn))
           attrs << attr
         end
       end

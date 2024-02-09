@@ -26,13 +26,6 @@ module NvidiaSmi
       end
     end
 
-    module Rpm
-      include Nvidia::Attribute::DecimalNumber
-      def unit
-        'RPM'
-      end
-    end
-
     module Megahertz
       def fetch
         raw = read
