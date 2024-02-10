@@ -5,7 +5,7 @@ require 'io/console'
 module SenseThing
   VERSION = Gem.loaded_specs['sensething']&.version
 
-  module Cli
+  module Cli # rubocop:disable Metrics/ModuleLength
     class Command < OptionParser
       attr_accessor :name, :short, :description
       attr_reader :cmd
@@ -142,6 +142,17 @@ module SenseThing
         r.on '-s NAME', '--sensor NAME', 'Name of a sensor to read' do |n|
           r[:name] = [] unless r[:name]
           r[:name] << n
+        end
+      end
+
+      parser.command 'serve' do |s|
+        s.description = 'Run web UI'
+        s.short = 's'
+        s.on '-a ADDRESS', 'Address for the server to use' do |a|
+          s[:address] = a
+        end
+        s.on '-p PORT', 'Port for the server to use' do |a|
+          s[:port] = Integer(a)
         end
       end
 

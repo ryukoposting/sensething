@@ -27,7 +27,7 @@ module SenseThing
     end
   end
 
-  def self.discover_cpufreq_devices(&block)
+  def self.discover_cpufreq_devices
     Dir.glob('/sys/devices/system/cpu/*/cpufreq') do |path|
       dev = begin
         Sysfs::Cpufreq.new(path)
@@ -40,7 +40,7 @@ module SenseThing
     end
   end
 
-  def self.discover_drm_devices(&block)
+  def self.discover_drm_devices
     Dir.glob('/sys/class/drm/*').each do |path|
       path = Pathname.new(path).realpath
       next unless path.join('gt').directory?

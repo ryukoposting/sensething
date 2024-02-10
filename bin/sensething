@@ -4,6 +4,10 @@
 require 'sensething'
 require 'csv'
 require 'json'
+require 'sinatra'
+require 'nokogiri'
+
+set :run, false
 
 def gather_sensors
   result = {}
@@ -142,6 +146,55 @@ def log_sensors(names, format, interval, units, timer)
   end
 end
 
+class Webui < Sinatra::Base
+  @sensors = []
+  class << self
+    attr_reader :sensors
+  end
+
+  get '/' do
+    sensor_groups = {}
+
+    self.class.sensors.each do |sensor|
+      group_name, subname = sensor.name.split '/', 2
+      sensor_groups[group_name] = [] unless sensor_groups[group_name]
+      sensor_groups[group_name] << [subname, sensor]
+    end
+
+    builder = Nokogiri::HTML4::Builder.new do |doc|
+      doc.html do
+        doc.body do
+          doc.h1 'SenseThing Web UI'
+          sensor_groups.each do |group_name, sensors|
+            doc.section do
+              doc.h2 group_name
+              doc.ul do
+                sensors.each do |sensor|
+                  subname, sensor = sensor
+                  doc.li "#{subname}: #{sensor.fetch} #{sensor.unit}"
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+
+    builder.to_html
+  end
+end
+
+def serve_webui(address, port)
+  SenseThing.discover_devices do |dev|
+    dev.each_sensor do |sensor|
+      Webui.sensors << sensor
+    end
+  end
+  Webui.set :bind, address if address
+  Webui.set :port, port if port
+  Webui.run!
+end
+
 args = SenseThing::Cli.parse_command_line
 
 case args&.cmd&.name
@@ -156,4 +209,6 @@ when 'read'
   read_sensors(args.cmd[:name])
 when 'log'
   log_sensors(args.cmd[:name], args.cmd[:format], args.cmd[:interval], args.cmd[:units], args.cmd[:timestamp])
+when 'serve'
+  serve_webui(args.cmd[:address], args.cmd[:port])
 end
