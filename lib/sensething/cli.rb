@@ -62,7 +62,7 @@ module SenseThing
       end
 
       def self.term_width
-        sz = IO.console.winsize
+        sz = IO.console&.winsize
         return 80 unless sz
 
         sz[1]
