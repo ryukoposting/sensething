@@ -18,13 +18,23 @@ module SenseThing
 
     module DecimalNumber
       def fetch
-        @val = Float(read)
+        r = read
+        @val = if r.nil?
+                 nil
+               else
+                 Float(r)
+               end
       end
     end
 
     module IntegralNumber
       def fetch
-        @val = Integer(read)
+        r = read
+        @val = if r.nil?
+                 nil
+               else
+                 Integer(r)
+               end
       end
     end
   end

@@ -19,6 +19,8 @@ module Sysfs
 
     def read
       File.read(path)
+    rescue Errno::ENODATA
+      nil
     end
 
     def same_sensor?(_other)

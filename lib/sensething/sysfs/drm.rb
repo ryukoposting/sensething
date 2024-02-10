@@ -7,10 +7,7 @@ require_relative 'device'
 module Sysfs
   class DrmAttribute < Attribute
     module Megahertz
-      def fetch
-        @val = Float(read)
-      end
-
+      include SenseThing::Attribute::DecimalNumber
       def unit
         'MHz'
       end

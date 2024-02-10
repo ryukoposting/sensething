@@ -58,7 +58,12 @@ module Sysfs
     module Celsius
       def fetch
         # hwmon measures in millidegrees
-        @val = Float(read) / 1000.0
+        r = read
+        @val = if r.nil?
+                 nil
+               else
+                 Float(r) / 1000.0
+               end
       end
 
       def unit

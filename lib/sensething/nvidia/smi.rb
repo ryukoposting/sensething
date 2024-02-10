@@ -29,6 +29,7 @@ module NvidiaSmi
     module Megahertz
       def fetch
         raw = read
+        return (@val = nil) if raw.nil?
         raise "Invalid nvidia-smi frequency string: #{raw.inspect}" unless /([0-9.]+) +MHz/ =~ raw
 
         @val = Float($1)
@@ -42,6 +43,7 @@ module NvidiaSmi
     module Watts
       def fetch
         raw = read
+        return (@val = nil) if raw.nil?
         raise "Invalid nvidia-smi power string: #{raw.inspect}" unless /([0-9.]+) +W/ =~ raw
 
         @val = Float($1)
@@ -55,6 +57,7 @@ module NvidiaSmi
     module Percentage
       def fetch
         raw = read
+        return (@val = nil) if raw.nil?
         raise "Invalid nvidia-smi percentage string: #{raw.inspect}" unless /([0-9.]+) +%/ =~ raw
 
         @val = Float($1) / 100.0
