@@ -19,7 +19,7 @@ module Sysfs
 
     def read
       File.read(path)
-    rescue Errno::ENODATA
+    rescue Errno::ENODATA, Errno::ENXIO
       nil
     end
 
