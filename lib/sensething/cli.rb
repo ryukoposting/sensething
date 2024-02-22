@@ -1,4 +1,5 @@
 require 'optparse'
+require 'optparse/version'
 require 'set'
 require 'io/console'
 
@@ -16,6 +17,10 @@ module SenseThing
         @flag_vals = {}
         on('-h', '--help', 'Show help message and exit') do
           full_help_message
+        end
+        on('-v', '--version', 'Show version and exit') do
+          puts "SenseThing #{VERSION}"
+          exit 0
         end
       end
 
@@ -99,12 +104,7 @@ module SenseThing
     end
 
     @option_parser = Command.new('sensething') do |parser| # rubocop:disable Metrics/BlockLength
-      parser.banner = 'sensething'
-
-      parser.on '-v', '--version', 'Show version info and exit' do
-        puts "Sensething #{VERSION}"
-        exit 0
-      end
+      parser.banner = 'SenseThing'
 
       parser.on '--license', 'Show license info and exit' do
         puts <<~GNU

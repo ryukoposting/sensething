@@ -4,10 +4,8 @@
 require 'sensething'
 require 'csv'
 require 'json'
-require 'sinatra'
 require 'nokogiri'
-
-set :run, false
+require 'net/http/server'
 
 def gather_sensors
   result = {}
@@ -146,16 +144,17 @@ def log_sensors(names, format, interval, units, timer)
   end
 end
 
-class Webui < Sinatra::Base
-  @sensors = []
-  class << self
-    attr_reader :sensors
+class Webui
+  attr_reader :sensors
+
+  def initialize
+    @sensors = []
   end
 
-  get '/' do
+  def html
     sensor_groups = {}
 
-    self.class.sensors.each do |sensor|
+    sensors.each do |sensor|
       group_name, subname = sensor.name.split '/', 2
       sensor_groups[group_name] = [] unless sensor_groups[group_name]
       sensor_groups[group_name] << [subname, sensor]
@@ -185,14 +184,24 @@ class Webui < Sinatra::Base
 end
 
 def serve_webui(address, port)
+  webui = Webui.new
+
   SenseThing.discover_devices do |dev|
     dev.each_sensor do |sensor|
-      Webui.sensors << sensor
+      webui.sensors << sensor
     end
   end
-  Webui.set :bind, address if address
-  Webui.set :port, port if port
-  Webui.run!
+
+  address ||= '127.0.0.1'
+  port = port ? Integer(port) : 4567
+
+  Net::HTTP::Server.run(port: port, host: address) do |request, _stream|
+    headers = {
+      'Content-Type': 'text/html'
+    }
+
+    [200, headers, [webui.html]]
+  end
 end
 
 args = SenseThing::Cli.parse_command_line

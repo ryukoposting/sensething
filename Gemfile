@@ -6,6 +6,6 @@ gem 'nokogiri', '~> 1.16.2'
 gem 'rackup', '~> 2.1.0'
 gem 'rake', '~> 13.0.0'
 gem 'rubocop', '~> 1.60'
-gem 'sinatra', '~> 4.0.0'
+gem 'net-http-server', '~> 0.2.3'
 
 gem 'open3'

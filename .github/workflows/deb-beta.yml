@@ -1,0 +1,52 @@
+name: Create beta deb package
+on:
+  push:
+    tags:
+      - v*
+jobs:
+  deb:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.0'
+    - name: Find package version
+      id: ver
+      run: |
+        echo "full=$(echo $GITHUB_REF | cut -d / -f 3- | sed 's,/,-,g')" >> "$GITHUB_OUTPUT"
+        echo "num=$(echo $GITHUB_REF | cut -d / -f 3 | cut -c2-)" >> "$GITHUB_OUTPUT"
+    - name: Build and test with Rake
+      run: |
+        gem install bundler
+        bundle install --jobs 4 --retry 3
+        bundle exec rake
+    - name: Install gem2deb
+      run: |
+        sudo apt update -yqq && sudo apt install -yqq --no-install-recommends gem2deb
+    - name: Show version ids
+      run: |
+        echo ${{ steps.ver.outputs.num }}
+        echo ${{ steps.ver.outputs.full }}
+    - name: Create deb
+      run: |
+        export EMAIL=$(git log -n 1 --pretty=format:%ae)
+        gem2deb -p sensething sensething-${{ steps.ver.outputs.num }}.gem
+    - name: Upload source artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: sensething-${{ steps.ver.outputs.full }}-source
+        path: |
+          lib/**/*.rb
+          bin/sensething
+          Gemfile
+          Gemfile.lock
+          Rakefile
+          LICENSE
+          sensething.gemspec
+    - name: Upload source artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: sensething_${{ steps.ver.outputs.num }}-1_all.deb
+        path: sensething_${{ steps.ver.outputs.num }}-1_all.deb

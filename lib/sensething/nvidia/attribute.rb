@@ -2,7 +2,9 @@
 
 require_relative '../common/attribute'
 
-module Nvidia
-  class Attribute < SenseThing::Attribute
+module SenseThing
+  module Nvidia
+    class Attribute < SenseThing::Attribute
+    end
   end
 end
