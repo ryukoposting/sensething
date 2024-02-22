@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name      = 'sensething'
-  s.version   = '0.0.1'
+  s.version   = '0.0.2'
   s.platform  = Gem::Platform::RUBY
   s.summary   = 'Simple-yet-powerful sensor logging utility for Linux'
   s.description = 'System-wide sensor data logging system with support for hwmon and nvidia-smi.'

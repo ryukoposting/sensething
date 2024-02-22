@@ -3,7 +3,7 @@
 require 'rubocop/rake_task'
 
 GEM_NAME = 'sensething'
-GEM_VERSION = '0.0.1'
+GEM_VERSION = '0.0.2'
 
 def del(pattern)
   pattern = File.join(__dir__, pattern)
