@@ -20,6 +20,7 @@ sensor data. Its goals are as follows:
    - [Changing the sampling rate](#changing-the-sampling-rate)
    - [Timestamps](#timestamps)
    - [Output formats: JSON and CSV](#output-formats-json-and-csv)
+8. [Monitoring sensor data remotely](#monitoring-sensor-data-remotely)
 
 # Rationale: why use SenseThing instead of lm-sensors?
 
@@ -229,3 +230,37 @@ JSON output, thanks to the `-f` (a.k.a. "--format") flag:
 sensething l -f json
 sensething l -f csv   # this is the default
 ```
+
+# Monitoring sensor data remotely
+
+If you want to monitor a system's sensors remotely, you could simply
+pipe `sensething l -f json ...` into netcat. While this approach can work
+great in some scenarios, it's far from perfect.
+
+For situations where you want a basic dashboard that shows a system's
+sensor data, SenseThing's `s` command (a.k.a "serve") exposes an HTTP server
+that provides a dead-simple list of the system's sensor readings:
+
+```
+# These are synonyms, use whichever one you prefer
+sensething s
+sensething serve
+```
+
+Run `sensething s`, open your browser, and navigate to `localhost:4567`. You'll
+see a page that looks something like this:
+
+![Screenshot of a web page titled "SenseThing Web UI," with a list of sensor measurements below the title.](/doc/webui.png)
+
+Pretty? Not really. Informative? Absolutely!
+
+The server's configuration can be altered using the `-a` and `-p` options,
+which set the server's address and port respectively. For example,
+
+```sh
+sensething s -a 0.0.0.0 -p 80
+```
+
+Note that the HTTP server currently lacks a couple of features that will be added
+eventually. However, you can trust that a simple HTML page like this one will
+always be returned when you send a `GET /` with `Accept: text/html`.
