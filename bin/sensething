@@ -4,8 +4,6 @@
 require 'sensething'
 require 'csv'
 require 'json'
-require 'nokogiri'
-require 'net/http/server'
 
 def gather_sensors
   result = {}
@@ -184,24 +182,26 @@ class Webui
 end
 
 def serve_webui(address, port)
-  webui = Webui.new
+  db = SenseThing::Server::SensorDb.new
 
   SenseThing.discover_devices do |dev|
     dev.each_sensor do |sensor|
-      webui.sensors << sensor
+      db.feed(sensor)
     end
   end
 
   address ||= '127.0.0.1'
   port = port ? Integer(port) : 4567
 
-  Net::HTTP::Server.run(port: port, host: address) do |request, _stream|
-    headers = {
-      'Content-Type': 'text/html'
-    }
+  SenseThing::Server.serve(db, port: port, host: address)
 
-    [200, headers, [webui.html]]
-  end
+  # Net::HTTP::Server.run(port: port, host: address) do |request, _stream|
+  #   headers = {
+  #     'Content-Type': 'text/html'
+  #   }
+
+  #   [200, headers, [webui.html]]
+  # end
 end
 
 args = SenseThing::Cli.parse_command_line

@@ -4,6 +4,7 @@ require_relative 'sensething/sysfs'
 require_relative 'sensething/nvidia'
 require_relative 'sensething/cli'
 require_relative 'sensething/timestamp'
+require_relative 'sensething/server'
 require 'pathname'
 
 module SenseThing
