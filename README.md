@@ -45,9 +45,11 @@ acquired via nvidia-smi.
 
 # Installation
 
-Right now, the best way to install SenseThing is by cloning this repository,
-and running the Ruby commands by hand. Better installation processes will be
-coming as I have time to develop them.
+For apt-based Linux distros, SenseThing can be installed using one of the deb
+files available in the [GitHub Releases].
+
+On other distros, unfortunately you'll have to install SenseThing manually.
+Run the following commands to check out this repo and install:
 
 ```sh
 git clone git@github.com:ryukoposting/sensething.git
@@ -56,6 +58,8 @@ bundle install
 rake install
 sensething --version
 ```
+
+[GitHub Releases]: https://github.com/ryukoposting/sensething/releases
 
 # Discovering your system's sensors
 
