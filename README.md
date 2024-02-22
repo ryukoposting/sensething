@@ -24,18 +24,19 @@ sensor data. Its goals are as follows:
 
 # Rationale: why use SenseThing instead of lm-sensors?
 
-Compared to lm-sensors, SenseThing shows all of the same sensor data, but with
-some very valuable additions:
+SenseThing shows all the same data as lm-sensors, plus some additional
+things:
 
 - SenseThing can report **CPU and GPU clock frequency** data, which is not
   reported by lm-sensors.
 - SenseThing **supports Nvidia** GPUs, and can report many of the same
   metrics reported by nvidia-smi.
 
-SenseThing supports CSV and JSON logging outputs, which is helpful for:
+SenseThing fits some use cases that aren't covered by lm-sensors. Here
+are a couple examples:
 
-- Analyzing system thermal/frequency data when running benchmarks.
-- Remotely monitoring the condition of hard-to-access systems.
+- Periodically logging sensor data to a CSV file during benchmark testing.
+- Monitoring remote servers through a simple web UI.
 
 # How SenseThing works
 
@@ -234,12 +235,9 @@ sensething l -f csv   # this is the default
 # Monitoring sensor data remotely
 
 If you want to monitor a system's sensors remotely, you could simply
-pipe `sensething l -f json ...` into netcat. While this approach can work
-great in some scenarios, it's far from perfect.
-
-For situations where you want a basic dashboard that shows a system's
-sensor data, SenseThing's `s` command (a.k.a "serve") exposes an HTTP server
-that provides a dead-simple list of the system's sensor readings:
+pipe `sensething l -f json ...` into netcat, but this approach has its fair
+share of flaws. SenseThing's `s` command (a.k.a "serve") exposes an HTTP
+server that provides more refined access to the system's sensors.
 
 ```
 # These are synonyms, use whichever one you prefer
@@ -254,13 +252,12 @@ see a page that looks something like this:
 
 Pretty? Not really. Informative? Absolutely!
 
+Adding `Accept: text/json` to your request will cause SenseThing to respond
+with JSON instead of HTML.
+
 The server's configuration can be altered using the `-a` and `-p` options,
 which set the server's address and port respectively. For example,
 
 ```sh
 sensething s -a 0.0.0.0 -p 80
 ```
-
-Note that the HTTP server currently lacks a couple of features that will be added
-eventually. However, you can trust that a simple HTML page like this one will
-always be returned when you send a `GET /` with `Accept: text/html`.

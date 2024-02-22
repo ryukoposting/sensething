@@ -181,7 +181,6 @@ module SenseThing
                         doc << "#{sensor.fetch} #{sensor.unit}"
                       end
 
-                      
                       if (max = sensor.maximum)
                         min = sensor.minimum || 0
                         doc.progress(style: style_grid(1, 3), value: sensor.value - min, max: max - min)
